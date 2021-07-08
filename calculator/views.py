@@ -26,12 +26,14 @@ def dish_view(request, dish_name):
         },
         'Ошибка': 'Нет данных'
     }
-    for recipes in context:
-        meal = recipes[0]
-        content = recipes[1]
-        if dish_name in meal:
-            final = f'{meal}:\n' + '\n'.join(f'{con[0]}, {con[1]} {con[2]}' for con in content)
-            return HttpResponse(final)
-        else:
-            return render(request, 'calculator/index.html', context)
-
+    servings = request.GET.get('servings')
+    for key, value in context.items():
+        if dish_name == key:
+            final = '; ''<br/>'.join([f'{key_1.capitalize()}: {value_1}' for key_1, value_1 in value.items()])
+            return HttpResponse(f'{dish_name}:<br/>{final}')
+        if dish_name == key and servings is not None:
+            result = '; ''<br/>'.join([f'{key_1.capitalize()}: {int(value_1) * int(servings)}'
+                                       for key_1, value_1 in value.items()])
+            return HttpResponse(f'{dish_name}:<br/>{result}')
+    else:
+        return HttpResponse('Такого рецепта нет в базе')
